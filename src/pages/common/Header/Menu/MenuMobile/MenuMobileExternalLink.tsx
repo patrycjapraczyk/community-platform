@@ -1,7 +1,7 @@
 import styled from 'styled-components'
-import React from 'react'
+import { Component } from 'react';
 import theme from 'src/themes/styled.theme'
-import { Box } from 'rebass'
+import { Box } from 'rebass/styled-components'
 import { LinkTargetBlank } from 'src/components/Links/LinkTargetBlank/LinkTargetBlank'
 import { observer, inject } from 'mobx-react'
 import { MobileMenuStore } from 'src/stores/MobileMenu/mobilemenu.store'
@@ -20,7 +20,7 @@ const PanelItem = styled(Box)`
 `
 @inject('mobileMenuStore')
 @observer
-export class MenuMobileExternalLink extends React.Component<IProps> {
+export class MenuMobileExternalLink extends Component<IProps> {
   // eslint-disable-next-line
   constructor(props: IProps) {
     super(props)

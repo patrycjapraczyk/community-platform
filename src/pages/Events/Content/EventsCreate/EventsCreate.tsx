@@ -18,9 +18,10 @@ import { LocationSearchField } from 'src/components/Form/LocationSearch.field'
 import styled from 'styled-components'
 import theme from 'src/themes/styled.theme'
 import { validateUrl, addProtocolMutator, required } from 'src/utils/validators'
-import { Box } from 'rebass'
+import { Box } from 'rebass/styled-components'
 import ElWithBeforeIcon from 'src/components/ElWithBeforeIcon'
 import IconHeaderEvents from 'src/assets/images/header-section/events-header-icon.svg'
+import { logger } from 'src/logger'
 
 interface IState {
   formValues: IEventFormInput
@@ -64,7 +65,7 @@ export class EventsCreate extends React.Component<IProps, IState> {
   }
 
   public onSubmit = async (formValues: IEventFormInput) => {
-    console.log('form values', formValues)
+    logger.debug('form values', formValues)
     await this.store.uploadEvent(formValues)
     this.props.history.push('/events')
   }
@@ -97,14 +98,7 @@ export class EventsCreate extends React.Component<IProps, IState> {
           addProtocolMutator,
         }}
         validateOnBlur
-        render={({
-          form: { mutators },
-          submitting,
-          values,
-          invalid,
-          errors,
-          handleSubmit,
-        }) => {
+        render={({ form: { mutators }, submitting, handleSubmit }) => {
           return (
             <Flex mx={-2} bg={'inherit'} flexWrap="wrap">
               <Flex bg="inherit" px={2} width={[1, 1, 2 / 3]} mt={4}>
@@ -153,6 +147,7 @@ export class EventsCreate extends React.Component<IProps, IState> {
                           data-cy="title"
                           validate={required}
                           validateFields={[]}
+                          modifiers={{ capitalize: true }}
                           component={InputField}
                           maxLength="140"
                           placeholder="Title of your event (max 140 characters)"
@@ -195,7 +190,7 @@ export class EventsCreate extends React.Component<IProps, IState> {
                             className="location-search-create"
                             validateFields={[]}
                             validate={required}
-                            customChange={v => {
+                            customChange={() => {
                               this.setState({
                                 isLocationSelected: true,
                               })

@@ -1,11 +1,11 @@
-import React from 'react'
+import { Component } from 'react';
 import MultiSelect from '@khanacademy/react-multi-select'
 import './GroupingFilter.css'
 import ElWithBeforeIcon from 'src/components/ElWithBeforeIcon'
 import { IMapGrouping } from 'src/models/maps.models'
 import { inject } from 'mobx-react'
 import { MapsStore } from 'src/stores/Maps/maps.store'
-import { Box } from 'rebass'
+import { Box } from 'rebass/styled-components'
 
 interface IProps {
   items: Array<IMapGrouping>
@@ -53,7 +53,7 @@ const ItemRenderer = ({ checked, option, onClick }) => {
   )
 }
 @inject('mapsStore')
-class GroupingFilterDesktop extends React.Component<IProps, IState> {
+class GroupingFilterDesktop extends Component<IProps, IState> {
   constructor(props: IProps) {
     super(props)
     this.state = {

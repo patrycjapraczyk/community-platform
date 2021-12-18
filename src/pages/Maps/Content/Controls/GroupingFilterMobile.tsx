@@ -1,8 +1,8 @@
-import React from 'react'
+import { Component } from 'react';
 import Text from 'src/components/Text'
 import { IMapGrouping } from 'src/models/maps.models'
 import checkmarkIcon from 'src/assets/icons/icon-checkmark.svg'
-import { Flex, Image } from 'rebass'
+import { Flex, Image } from 'rebass/styled-components'
 import { inject } from 'mobx-react'
 import { MapsStore } from 'src/stores/Maps/maps.store'
 
@@ -21,7 +21,7 @@ interface IInjectedProps extends IProps {
 }
 
 @inject('mapsStore')
-class GroupingFilterMobile extends React.Component<IProps, IState> {
+class GroupingFilterMobile extends Component<IProps, IState> {
   constructor(props: IProps) {
     super(props)
     this.state = {

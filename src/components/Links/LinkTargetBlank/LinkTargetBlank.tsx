@@ -1,7 +1,6 @@
-import * as React from 'react'
-import { Link } from 'rebass'
+import { Link } from 'rebass/styled-components'
 import ImageTargetBlank from 'src/assets/icons/link-target-blank.svg'
-import { zIndex } from 'src/themes/styled.theme'
+import theme from 'src/themes/styled.theme'
 
 export const LinkTargetBlank = props => (
   <Link
@@ -15,7 +14,7 @@ export const LinkTargetBlank = props => (
         backgroundImage: `url("${ImageTargetBlank}")`,
         width: '20px',
         height: '20px',
-        zIndex: `${zIndex.level}`,
+        zIndex: `${theme.zIndex.level}`,
         backgroundSize: 'contain',
         backgroundRepeat: 'no-repeat',
         position: 'absolute',

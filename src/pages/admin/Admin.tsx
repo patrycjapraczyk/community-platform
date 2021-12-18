@@ -5,10 +5,10 @@ import { AdminTags } from './content/AdminTags'
 import { AdminUsers } from './content/AdminUsers'
 import { AdminBetaTesters } from './content/AdminBetaTesters'
 import { AuthWrapper } from 'src/components/Auth/AuthWrapper'
-import { Link } from 'react-router-dom'
+import { Link } from 'src/components/Links'
 import Text from 'src/components/Text'
 import Flex from 'src/components/Flex'
-import { Box } from 'rebass'
+import { Box } from 'rebass/styled-components'
 import { inject, observer } from 'mobx-react'
 import { AdminStore } from 'src/stores/Admin/admin.store'
 
@@ -28,7 +28,7 @@ interface IInjectedProps extends IProps {
 }
 @inject('adminStore')
 @observer
-class AdminPageClass extends React.Component<IProps, any> {
+class AdminPage extends React.Component<IProps, any> {
   componentDidMount() {
     this.injected.adminStore.init()
   }
@@ -66,7 +66,6 @@ class AdminPageClass extends React.Component<IProps, any> {
               key={route.name}
               path={`/admin/${route.slug}`}
               component={route.component}
-              redirectPath="/admin"
               roleRequired="admin"
             />
           ))}
@@ -75,4 +74,4 @@ class AdminPageClass extends React.Component<IProps, any> {
     )
   }
 }
-export const AdminPage: any = withRouter(AdminPageClass as any)
+export default withRouter(AdminPage as any)

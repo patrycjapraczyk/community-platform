@@ -10,13 +10,14 @@ import {
 
 import { UserStore } from 'src/stores/User/user.store'
 import Heading from 'src/components/Heading'
-import { Box, Image } from 'rebass'
+import { Box, Image } from 'rebass/styled-components'
+// import slick and styles
 import Slider from 'react-slick'
+import 'src/assets/css/slick.min.css'
 import styled from 'styled-components'
 import Icon from 'src/components/Icons'
 import Flex from 'src/components/Flex'
 import ElWithBeforeIcon from 'src/components/ElWithBeforeIcon'
-import { zIndex } from 'src/themes/styled.theme'
 import Workspace from 'src/pages/User/workspace/Workspace'
 import { Text } from 'src/components/Text'
 import { Link } from 'src/components/Links'
@@ -35,17 +36,20 @@ import PSIcon from 'src/assets/images/plastic-types/ps.svg'
 import PVCIcon from 'src/assets/images/plastic-types/pvc.svg'
 
 import EventsIcon from 'src/assets/icons/icon-events.svg'
-// import ExpertIcon from 'src/assets/icons/icon-expert.svg'
 import HowToCountIcon from 'src/assets/icons/icon-how-to.svg'
+import VerifiedBadgeIcon from 'src/assets/icons/icon-verified-badge.svg'
 // import V4MemberIcon from 'src/assets/icons/icon-v4-member.svg'
 
 import { IUploadedFileMeta } from 'src/stores/storage'
 import { IConvertedFileMeta } from 'src/components/ImageInput/ImageInput'
 import { Loader } from 'src/components/Loader'
 
+import type { ThemeStore } from 'src/stores/Theme/theme.store'
 import { AuthWrapper } from 'src/components/Auth/AuthWrapper'
 import { AdminContact } from 'src/components/AdminContact/AdminContact'
 import ProfileLink from './ProfileLink'
+import { logger } from 'src/logger'
+import { Avatar } from 'src/components/Avatar'
 
 interface IRouterCustomParams {
   id: string
@@ -56,7 +60,8 @@ interface IBackgroundImageProps {
 }
 
 interface InjectedProps extends RouteComponentProps<IRouterCustomParams> {
-  userStore: UserStore
+  userStore: UserStore,
+  themeStore: ThemeStore
 }
 
 interface IState {
@@ -69,7 +74,7 @@ interface IProps {}
 const UserCategory = styled.div`
   position: relative;
   display: inline-block;
-  z-index: ${zIndex.default};
+  z-index: ${theme.zIndex.default};
 
   &:after {
     content: '';
@@ -78,7 +83,7 @@ const UserCategory = styled.div`
     position: absolute;
     top: 0;
 
-    z-index: ${zIndex.behind};
+    z-index: ${theme.zIndex.behind};
     background-repeat: no-repeat;
     background-size: contain;
     left: 0;
@@ -140,6 +145,9 @@ const ProfileWrapper = styled(Box)`
   border: 2px solid black;
   border-radius: 10px;
   overflow: hidden;
+  max-width: 1000px;
+  width: 100%;
+  align-self: center;
 `
 
 const ProfileWrapperCarousel = styled.div``
@@ -201,7 +209,7 @@ const MachineExperienceTab = styled.div`
   margin-right: 10px;
 `
 
-@inject('userStore')
+@inject('userStore', 'themeStore')
 @observer
 export class UserPage extends React.Component<
   RouteComponentProps<IRouterCustomParams>,
@@ -220,7 +228,8 @@ export class UserPage extends React.Component<
     return this.props as InjectedProps
   }
 
-  public async componentWillMount() {
+  /* eslint-disable @typescript-eslint/naming-convention*/
+  public async UNSAFE_componentWillMount() {
     const userid = this.props.match.params.id
     const userData = await this.injected.userStore.getUserProfile(userid)
     this.setState({
@@ -242,17 +251,16 @@ export class UserPage extends React.Component<
 
     return (
       <UserStatsBox>
-        {/* {isExpert && (
-          <UserStatsBoxItem>
-            <ElWithBeforeIcon IconUrl={ExpertIcon} height="25px">
-              Expert
-            </ElWithBeforeIcon>
+        {user.badges?.verified && (
+          <UserStatsBoxItem style={{ marginBottom: '15px' }}>
+            <Image src={VerifiedBadgeIcon} width="22px" height="22px" />
+            <Box ml="5px">Verified</Box>
           </UserStatsBoxItem>
-        )} */}
+        )}
         {user.location && (
           <Link color={'black'} to={'/map/#' + user.userName}>
             <UserStatsBoxItem>
-              <Icon glyph="location-on" size="25"></Icon>
+              <Icon glyph="location-on" size="22"></Icon>
               <Box ml="5px">{user.location?.country}</Box>
             </UserStatsBoxItem>
           </Link>
@@ -367,7 +375,7 @@ export class UserPage extends React.Component<
 
   public render() {
     const { user, isLoading } = this.state
-    console.log('render', user)
+    logger.debug('render', user)
     if (isLoading) {
       return <Loader />
     }
@@ -378,7 +386,6 @@ export class UserPage extends React.Component<
         </Text>
       )
     }
-    const workspaceBadgeSrc = Workspace.findWorkspaceBadge(user.profileType)
     const workspaceHighlightSrc = Workspace.findWordspaceHighlight(
       user.profileType,
     )
@@ -418,7 +425,7 @@ export class UserPage extends React.Component<
           <Box width={['100%', '100%', '80%']}>
             <Box sx={{ display: ['block', 'block', 'none'] }}>
               <MobileBadge>
-                <Image src={workspaceBadgeSrc} />
+                <Avatar profileType={user.profileType}/>
               </MobileBadge>
             </Box>
 
@@ -482,7 +489,10 @@ export class UserPage extends React.Component<
             sx={{ display: ['none', 'none', 'block'] }}
           >
             <MobileBadge>
-              <Image src={workspaceBadgeSrc} />
+              <Avatar
+                width="150"
+                profileType={user.profileType}
+                />
 
               {shouldRenderUserStatsBox && this.renderUserStatsBox(user)}
             </MobileBadge>
@@ -500,9 +510,9 @@ const sliderSettings = {
   slidesToScroll: 1,
   adaptiveHeight: false,
   nextArrow: (
-    <Icon glyph="chevron-right" color="#fff" size={60} marginRight="4px" />
+    <Icon glyph="chevron-right" color={theme.colors.white} size={60} marginRight="4px" />
   ),
   prevArrow: (
-    <Icon glyph="chevron-left" color="#fff" size={60} marginRight="4px" />
+    <Icon glyph="chevron-left" color={theme.colors.white} size={60} marginRight="4px" />
   ),
 }

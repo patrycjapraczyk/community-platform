@@ -1,5 +1,5 @@
 import * as React from 'react'
-import { Flex, Box } from 'rebass'
+import { Flex, Box } from 'rebass/styled-components'
 import themes from 'src/themes/styled.theme'
 import {
   List,
@@ -38,7 +38,8 @@ export class VirtualizedFlex extends React.Component<IProps, IState> {
     this.state = { data: [], dataRows: [], totalColumns: -1 }
   }
 
-  componentWillReceiveProps(props: IProps) {
+  /* eslint-disable @typescript-eslint/naming-convention*/
+  UNSAFE_componentWillReceiveProps(props: IProps) {
     this.generateRowData(props)
   }
 

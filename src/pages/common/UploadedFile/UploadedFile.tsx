@@ -2,9 +2,10 @@ import * as React from 'react'
 import { IFirebaseUploadInfo } from 'src/components/FirebaseFileUploader/FirebaseFileUploader'
 import { storage } from 'src/utils/firebase'
 import './UploadedFile.scss'
-import Button from '@material-ui/core/Button'
+import { Button } from 'src/components/Button'
 import Icon from 'src/components/Icons'
 import ImagePreview from './ImagePreview'
+import { logger } from 'src/logger'
 
 /*************************************************************************
  * Component to display a file that has been uploaded to firebase storage,
@@ -57,7 +58,12 @@ export class UploadedFile extends React.Component<IUploadedFileProps, IState> {
           // file display
           <div className="file-meta__container">
             <div className="file-meta__name">
-              <a download target="_blank" href={file.downloadUrl}>
+              <a
+                download
+                target="_blank"
+                href={file.downloadUrl}
+                rel="noreferrer"
+              >
                 {file.name}
               </a>
             </div>
@@ -93,7 +99,7 @@ export class UploadedFile extends React.Component<IUploadedFileProps, IState> {
 }
 
 UploadedFile.defaultProps = {
-  onFileDeleted: () => console.log('file deleted'),
+  onFileDeleted: () => logger.debug('file deleted'),
   imagePreview: false,
   showDelete: false,
 }

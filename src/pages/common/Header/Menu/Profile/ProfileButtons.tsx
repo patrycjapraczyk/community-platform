@@ -1,7 +1,7 @@
-import React from 'react'
+import { Component } from 'react';
 import theme from 'src/themes/styled.theme'
 import styled from 'styled-components'
-import { Box } from 'rebass'
+import { Box } from 'rebass/styled-components'
 import ProfileButtonItem from './ProfileButtonItem'
 
 interface IProps {
@@ -13,7 +13,7 @@ const PanelButton = styled(Box)`
   padding-bottom: ${theme.space[2]}px;
 `
 
-export class ProfileButtons extends React.Component<IProps> {
+export class ProfileButtons extends Component<IProps> {
   render() {
     return (
       <>

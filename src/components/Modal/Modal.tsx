@@ -1,13 +1,14 @@
 import * as React from 'react'
 import { Portal } from 'react-portal'
-import { Box } from 'rebass'
+import { Box } from 'rebass/styled-components'
 import styled from 'styled-components'
-import { zIndex } from 'src/themes/styled.theme'
+import theme from 'src/themes/styled.theme'
 
 interface IProps {
   // provide onDidDismiss function to enable backdrop click dismiss
   onDidDismiss: (data?: any) => void
   height?: number
+  width?: number
 }
 interface IState {
   isOpen: boolean
@@ -19,7 +20,7 @@ const ModalBackdrop = styled(Box)`
   left: 0;
   width: 100%;
   height: 100%;
-  z-index: ${zIndex.modalBackdrop};
+  z-index: ${theme.zIndex.modalBackdrop};
   background: rgba(0, 0, 0, 0.4);
 `
 const ModalContent = styled(Box)`
@@ -32,7 +33,7 @@ const ModalContent = styled(Box)`
   max-width: 100%;
   max-height: 100%;
   position: fixed;
-  z-index: ${zIndex.modalContent};
+  z-index: ${theme.zIndex.modalContent};
   left: 50%;
   top: 50%;
   transform: translate(-50%, -50%);
@@ -54,12 +55,12 @@ export class Modal extends React.Component<IProps, IState> {
 
   render() {
     const isOpen = this.state
-    const { height, children } = this.props
+    const { height, width, children } = this.props
     return (
       isOpen && (
         <Portal id="portal">
           <ModalBackdrop id="ModalBackdrop" onClick={() => this.dismiss()} />
-          <ModalContent id="ModalContent" style={height ? { height } : {}}>
+          <ModalContent id="ModalContent" height={height} width={width}>
             {children}
           </ModalContent>
         </Portal>

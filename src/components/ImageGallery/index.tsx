@@ -1,8 +1,9 @@
-import React from 'react'
+import { PureComponent } from 'react'
 import Lightbox from 'react-image-lightbox'
 import { Card, CardProps, Flex, Image } from 'rebass/styled-components'
 import { IUploadedFileMeta } from 'src/stores/storage'
 import styled from 'styled-components'
+import theme from '../../themes/styled.theme';
 
 interface IProps {
   images: IUploadedFileMeta[]
@@ -28,7 +29,7 @@ const ThumbImage = styled(Image)`
   object-fit: cover;
   width: 100px;
   height: 67px;
-  border: 1px solid #ececec;
+  border: 1px solid ${theme.colors.offwhite};
   border-radius: 5px;
 `
 
@@ -39,7 +40,7 @@ const ImageWithPointer = styled(Image)`
   object-fit: cover;
 `
 
-export default class ImageGallery extends React.PureComponent<IProps, IState> {
+export default class ImageGallery extends PureComponent<IProps, IState> {
   constructor(props) {
     super(props)
     this.state = {
@@ -50,7 +51,8 @@ export default class ImageGallery extends React.PureComponent<IProps, IState> {
     }
   }
 
-  componentWillMount() {
+  /* eslint-disable @typescript-eslint/naming-convention*/
+  UNSAFE_componentWillMount() {
     const images = this.props.images.filter(img => img !== null)
     const activeImage = images.length > 0 ? images[0] : null
     this.setState({
@@ -85,6 +87,7 @@ export default class ImageGallery extends React.PureComponent<IProps, IState> {
             onClick={() => {
               this.triggerLightbox()
             }}
+            crossOrigin=""
           />
         </Flex>
         <Flex flexWrap={'wrap'} width={1} mx={[2, 2, '-5px']}>
@@ -98,7 +101,11 @@ export default class ImageGallery extends React.PureComponent<IProps, IState> {
                   onClick={() => this.setActive(image)}
                   key={index}
                 >
-                  <ThumbImage src={image.downloadUrl} key={index} />
+                  <ThumbImage
+                    src={image.downloadUrl}
+                    key={index}
+                    crossOrigin=""
+                  />
                 </ThumbCard>
               ))
             : null}

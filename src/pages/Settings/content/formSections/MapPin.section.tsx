@@ -4,7 +4,7 @@ import Heading from 'src/components/Heading'
 import { Field } from 'react-final-form'
 import Text from 'src/components/Text'
 import { TextAreaField } from 'src/components/Form/Fields'
-import { Box, Flex, Link } from 'rebass'
+import { Box, Flex, Link } from 'rebass/styled-components'
 import { FlexSectionContainer, ArrowIsSectionOpen } from './elements'
 import { Map, TileLayer, Marker, Popup, ZoomControl } from 'react-leaflet'
 import L from 'leaflet'
@@ -29,7 +29,7 @@ const customMarker = L.icon({
 
 @inject('mapsStore', 'userStore')
 @observer
-export class UserMapPinSection extends React.Component<{}, IState> {
+export class UserMapPinSection extends React.Component<any, IState> {
   pinFilters = MAP_GROUPINGS
   constructor(props) {
     super(props)

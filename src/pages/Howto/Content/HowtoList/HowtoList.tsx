@@ -1,5 +1,5 @@
 import * as React from 'react'
-import { Flex, Box } from 'rebass'
+import { Flex, Box } from 'rebass/styled-components'
 import { Link } from 'src/components/Links'
 import TagsSelect from 'src/components/Tags/TagsSelect'
 import { inject, observer } from 'mobx-react'
@@ -8,7 +8,7 @@ import { UserStore } from 'src/stores/User/user.store'
 import { Button } from 'src/components/Button'
 import { AuthWrapper } from 'src/components/Auth/AuthWrapper'
 import MoreContainer from 'src/components/MoreContainer/MoreContainer'
-import HowToCard from 'src/components/HowToCard/HowToCard'
+import HowToCard from './HowToCard'
 import Heading from 'src/components/Heading'
 import { Loader } from 'src/components/Loader'
 import { VirtualizedFlex } from 'src/components/VirtualizedFlex/VirtualizedFlex'
@@ -39,7 +39,7 @@ const updateQueryParams = (url: string, key: string, val: string) => {
 }
 
 // First we use the @inject decorator to bind to the howtoStore state
-@inject('howtoStore', 'userStore')
+@inject('howtoStore', 'userStore', 'themeStore')
 // Then we can use the observer component decorator to automatically tracks observables and re-renders on change
 // (note 1, use ! to tell typescript that the store will exist (it's an injected prop))
 // (note 2, mobx seems to behave more consistently when observables are referenced outside of render methods)
@@ -50,6 +50,7 @@ export class HowtoList extends React.Component<any, IState> {
     this.state = {
       isLoading: true,
     }
+
     if (props.location.search) {
       const searchParams = new URLSearchParams(props.location.search)
 
@@ -67,21 +68,50 @@ export class HowtoList extends React.Component<any, IState> {
       if (searchQuery) {
         this.props.howtoStore.updateSearchValue(searchQuery)
       }
+
+      this.props.howtoStore.updateReferrerSource(
+        searchParams.get('source')?.toString(),
+      )
     }
   }
   get injected() {
     return this.props as InjectedProps
   }
 
+  /* eslint-disable @typescript-eslint/naming-convention*/
+  UNSAFE_componentWillMount() {
+    if (!new RegExp(/source=how-to-not-found/).test(window.location.search)) {
+      this.props.howtoStore.updateReferrerSource('')
+    }
+  }
+
   public render() {
-    const { filteredHowtos, selectedTags, searchValue } = this.props.howtoStore
+    const {
+      filteredHowtos,
+      selectedTags,
+      searchValue,
+      referrerSource,
+    } = this.props.howtoStore
+
+    const theme = this.props?.themeStore?.currentTheme
 
     return (
       <>
         <Flex py={26}>
-          <Heading medium bold txtcenter width={1} my={20}>
-            Learn & share how to recycle, build and work with plastic
-          </Heading>
+          {referrerSource ? (
+            <Box width={1}>
+              <Heading medium bold txtcenter mt={20}>
+                The page you were looking for was moved or doesn't exist.
+              </Heading>
+              <Heading small txtcenter mt={3} mb={10}>
+                Search all of our how-to's below
+              </Heading>
+            </Box>
+          ) : (
+            <Heading medium bold txtcenter width={1}>
+              {theme && theme.howtoHeading}
+            </Heading>
+          )}
         </Flex>
         <Flex
           flexWrap={'nowrap'}

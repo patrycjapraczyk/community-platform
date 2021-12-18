@@ -3,7 +3,7 @@ import * as React from 'react'
 import Flex from 'src/components/Flex'
 import Heading from 'src/components/Heading'
 import Text from 'src/components/Text'
-import { Box } from 'rebass'
+import { Box } from 'rebass/styled-components'
 import { FlexSectionContainer, ArrowIsSectionOpen } from './elements'
 import { WORKSPACE_TYPES } from 'src/mocks/user_pp.mock'
 import { CustomRadioField } from './Fields/CustomRadio.field'
@@ -15,7 +15,7 @@ interface IState {
   isOpen?: boolean
 }
 
-export class WorkspaceSection extends React.Component<{}, IState> {
+export class WorkspaceSection extends React.Component<any, IState> {
   state = {
     isOpen: true,
   }

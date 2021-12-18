@@ -1,4 +1,4 @@
-import React from 'react'
+import { PureComponent } from 'react'
 import TagDisplay from 'src/components/Tags/TagDisplay/TagDisplay'
 import { format } from 'date-fns'
 import { IHowtoDB } from 'src/models/howto.models'
@@ -6,14 +6,18 @@ import Heading from 'src/components/Heading'
 import Text from 'src/components/Text'
 import ModerationStatusText from 'src/components/ModerationStatusText'
 import { Link } from 'src/components/Links'
-import { Box, Flex, Image } from 'rebass'
+import { Box, Flex, Image } from 'rebass/styled-components'
 import { FileInfo } from 'src/components/FileInfo/FileInfo'
 import StepsIcon from 'src/assets/icons/icon-steps.svg'
 import TimeNeeded from 'src/assets/icons/icon-time-needed.svg'
 import DifficultyLevel from 'src/assets/icons/icon-difficulty-level.svg'
 import { Button } from 'src/components/Button'
 import { IUser } from 'src/models/user.models'
-import { isAllowToEditContent, emStringToPx } from 'src/utils/helpers'
+import {
+  isAllowToEditContent,
+  emStringToPx,
+  capitalizeFirstLetter,
+} from 'src/utils/helpers'
 import theme from 'src/themes/styled.theme'
 import ArrowIcon from 'src/assets/icons/icon-arrow-select.svg'
 import { FlagIconHowTos } from 'src/components/Icons/FlagIcon/FlagIcon'
@@ -29,7 +33,7 @@ interface IProps {
   onUsefulClick: () => void
 }
 
-export default class HowtoDescription extends React.PureComponent<IProps> {
+export default class HowtoDescription extends PureComponent<IProps> {
   // eslint-disable-next-line
   constructor(props: IProps) {
     super(props)
@@ -143,11 +147,17 @@ export default class HowtoDescription extends React.PureComponent<IProps> {
                 | Published on {this.dateCreatedByText(howto)}
               </Text>
             </Flex>
-            <Text auxiliary sx={{ color: '#b7b5b5 !important' }} mt={1} mb={2}>
+            <Text
+              auxiliary
+              sx={{ color: `${theme.colors.lightgrey} !important` }}
+              mt={1}
+              mb={2}
+            >
               {this.dateLastEditText(howto)}
             </Text>
             <Heading medium mt={2} mb={1}>
-              {howto.title}
+              {/* HACK 2021-07-16 - new howtos auto capitalize title but not older */}
+              {capitalizeFirstLetter(howto.title)}
             </Heading>
             <Text preLine paragraph>
               {howto.description}
@@ -195,9 +205,10 @@ export default class HowtoDescription extends React.PureComponent<IProps> {
             sx={{
               objectFit: 'cover',
               width: 'auto',
-              height: ['100%', '450px'],
+              height: '100%',
             }}
             src={howto.cover_image.downloadUrl}
+            crossOrigin=""
             alt="how-to cover"
           />
           {howto.moderation !== 'accepted' && (

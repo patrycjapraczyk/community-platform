@@ -1,5 +1,4 @@
-import * as React from 'react'
-import { Link } from 'rebass'
+import { Link } from 'rebass/styled-components'
 import Flex from 'src/components/Flex'
 import Heading from 'src/components/Heading'
 import Text from 'src/components/Text'
@@ -21,7 +20,7 @@ export const PostingGuidelines = () => (
       <Link
         color={theme.colors.blue}
         target="_blank"
-        href="/academy/create/research"
+        href="/academy/guides/research"
       >
         our guidelines{' '}
         <span role="img" aria-label="nerd-face">

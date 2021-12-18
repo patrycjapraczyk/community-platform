@@ -4,7 +4,7 @@ import { RouteComponentProps, withRouter, Route, Switch } from 'react-router'
 
 import { MapsStore } from 'src/stores/Maps/maps.store'
 import { MapView, Controls } from './Content'
-import { Box } from 'rebass'
+import { Box } from 'rebass/styled-components'
 
 import './styles.css'
 
@@ -24,7 +24,7 @@ interface IState {
 
 @inject('mapsStore')
 @observer
-class MapsPageClass extends React.Component<IProps, IState> {
+class MapsPage extends React.Component<IProps, IState> {
   mapRef: React.RefObject<Map>
 
   constructor(props: any) {
@@ -41,7 +41,8 @@ class MapsPageClass extends React.Component<IProps, IState> {
   public async componentDidMount() {
     this.props.mapsStore.retrieveMapPins()
     this.props.mapsStore.retrievePinFilters()
-    if (!this.showPinFromURL()) {
+    await this.showPinFromURL()
+    if (!this.props.mapsStore.activePin) {
       this.promptUserLocation()
     }
   }
@@ -78,23 +79,19 @@ class MapsPageClass extends React.Component<IProps, IState> {
     })
   }
 
-  private showPinFromURL() {
+  /** Check current hash in case matches a mappin and try to load */
+  private async showPinFromURL() {
     const pinId = this.props.location.hash.substr(1)
-    if (pinId.length > 0) {
-      this.props.mapsStore.getPin(pinId).then(pin => {
-        if (typeof pin !== 'undefined') {
-          this.props.mapsStore.setActivePin(pin)
-          if (this.state.firstLoad) {
-            this.setCenter(pin.location)
-          }
-        } else {
-          // TODO - handle pin not found
-        }
-      })
-      return true
-    } else {
-      return false
+    // Only lookup if not already the active pin
+    if (pinId && pinId !== this.props.mapsStore.activePin?._id) {
+      const pin = await this.props.mapsStore.getPin(pinId)
+      this.props.mapsStore.setActivePin(pin)
     }
+    // Center on the pin if first load
+    if (this.state.firstLoad && this.props.mapsStore.activePin) {
+      this.setCenter(this.props.mapsStore.activePin.location)
+    }
+    // TODO - handle pin not found
   }
 
   public render() {
@@ -138,4 +135,4 @@ class MapsPageClass extends React.Component<IProps, IState> {
   }
 }
 
-export const MapsPage: any = withRouter(MapsPageClass as any)
+export default withRouter(MapsPage as any)

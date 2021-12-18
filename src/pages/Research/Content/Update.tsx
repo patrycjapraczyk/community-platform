@@ -1,8 +1,8 @@
 import { format } from 'date-fns'
-import React from 'react'
+import * as React from 'react';
 import Linkify from 'react-linkify'
 import ReactPlayer from 'react-player'
-import { Box } from 'rebass'
+import { Box } from 'rebass/styled-components'
 import { Button } from 'src/components/Button'
 import Flex from 'src/components/Flex'
 import Heading from 'src/components/Heading'

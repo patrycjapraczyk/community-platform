@@ -15,10 +15,13 @@ import {
   filterModerableItems,
   hasAdminRights,
   needsModeration,
+  randomID,
 } from 'src/utils/helpers'
 import { RootStore } from '..'
 import { ModuleStore } from '../common/module.store'
 import { IUploadedFileMeta } from '../storage'
+import { IComment } from 'src/models/howto.models'
+import { logger } from 'src/logger'
 
 const COLLECTION_NAME = 'howtos'
 const HOWTO_SEARCH_WEIGHTS = [
@@ -40,18 +43,25 @@ export class HowtoStore extends ModuleStore {
   @observable
   public searchValue: string
   @observable
+  public referrerSource: string
+  @observable
   public uploadStatus: IHowToUploadStatus = getInitialUploadStatus()
   @observable howtoStats: IHowtoStats | undefined
+
   constructor(rootStore: RootStore) {
     // call constructor on common ModuleStore (with db endpoint), which automatically fetches all docs at
     // the given endpoint and emits changes as data is retrieved from cache and live collection
     super(rootStore, COLLECTION_NAME)
     makeObservable(this)
-    this.allDocs$.subscribe((docs: IHowtoDB[]) => {
-      this.allHowtos = docs.sort((a, b) => (a._created < b._created ? 1 : -1))
-    })
+    this.allDocs$.subscribe((docs: IHowtoDB[]) => this.setAllHowtos(docs))
     this.selectedTags = {}
     this.searchValue = ''
+    this.referrerSource = ''
+  }
+
+  @action
+  private setAllHowtos(docs: IHowtoDB[]) {
+    this.allHowtos = docs.sort((a, b) => (a._created < b._created ? 1 : -1))
   }
 
   @action
@@ -63,7 +73,7 @@ export class HowtoStore extends ModuleStore {
       .collection<IHowto>(COLLECTION_NAME)
       .getWhere('slug', '==', slug)
     const activeHowto = collection.length > 0 ? collection[0] : undefined
-    console.log('active howto', activeHowto)
+    logger.debug('active howto', activeHowto)
     this.activeHowto = activeHowto
     // load howto stats which are stored in a separate subcollection
     await this.loadHowtoStats(activeHowto?._id)
@@ -77,7 +87,7 @@ export class HowtoStore extends ModuleStore {
         .collection<IHowtoStats>('howtos')
         .doc(`${id}/stats/all`)
       const howtoStats = await ref.get('server')
-      console.log('howtoStats', howtoStats)
+      logger.debug('howtoStats', howtoStats)
       this.howtoStats = howtoStats || { votedUsefulCount: 0 }
     }
   }
@@ -116,6 +126,10 @@ export class HowtoStore extends ModuleStore {
     this.searchValue = query
   }
 
+  public updateReferrerSource(source: string) {
+    this.referrerSource = source
+  }
+
   public updateSelectedTags(tagKey: ISelectedTags) {
     this.selectedTags = tagKey
   }
@@ -125,23 +139,136 @@ export class HowtoStore extends ModuleStore {
     if (!hasAdminRights(toJS(this.activeUser))) {
       return false
     }
-    const doc = this.db.collection(COLLECTION_NAME).doc(howto._id)
-    return doc.set(howto)
+    const ref = this.db.collection(COLLECTION_NAME).doc(howto._id)
+    // NOTE CC - 2021-07-06 mobx updates try write to db as observable, so need to convert toJS
+    return ref.set(toJS(howto))
   }
 
   public needsModeration(howto: IHowto) {
     return needsModeration(howto, toJS(this.activeUser))
   }
 
+  @action
+  public async addComment(text: string) {
+    try {
+      const user = this.activeUser
+      const howto = this.activeHowto
+      const comment = text.slice(0, 400).trim()
+      if (user && howto && comment) {
+        const newComment: IComment = {
+          _id: randomID(),
+          _created: new Date().toISOString(),
+          _creatorId: user._id,
+          creatorName: user.userName,
+          creatorCountry:
+            user.country?.toLowerCase() ||
+            user.location?.countryCode?.toLowerCase() ||
+            null,
+          text: comment,
+        }
+
+        const updatedHowto: IHowto = {
+          ...toJS(howto),
+          comments: howto.comments
+            ? [...toJS(howto.comments), newComment]
+            : [newComment],
+        }
+
+        const dbRef = this.db
+          .collection<IHowto>(COLLECTION_NAME)
+          .doc(updatedHowto._id)
+
+        await dbRef.set(updatedHowto)
+
+        // Refresh the active howto
+        this.activeHowto = await dbRef.get()
+      }
+    } catch (err) {
+      console.error(err)
+      throw new Error(err)
+    }
+  }
+
+  @action
+  public async editComment(id: string, newText: string) {
+    try {
+      const howto = this.activeHowto
+      const user = this.activeUser
+      if (id && howto && user && howto.comments) {
+        const comments = toJS(howto.comments)
+        const commentIndex = comments.findIndex(
+          comment => comment._creatorId === user._id && comment._id === id,
+        )
+        if (commentIndex !== -1) {
+          comments[commentIndex].text = newText.slice(0, 400).trim()
+          comments[commentIndex]._edited = new Date().toISOString()
+
+          const updatedHowto: IHowto = {
+            ...toJS(howto),
+            comments,
+          }
+
+          const dbRef = this.db
+            .collection<IHowto>(COLLECTION_NAME)
+            .doc(updatedHowto._id)
+
+          await dbRef.set(updatedHowto)
+
+          // Refresh the active howto
+          this.activeHowto = await dbRef.get()
+        }
+      }
+    } catch (err) {
+      console.error(err)
+      throw new Error(err)
+    }
+  }
+
+  @action
+  public async deleteComment(id: string) {
+    try {
+      const howto = this.activeHowto
+      const user = this.activeUser
+      if (id && howto && user && howto.comments) {
+        const comments = toJS(howto.comments).filter(
+          comment => !(comment._creatorId === user._id && comment._id === id),
+        )
+
+        const updatedHowto: IHowto = {
+          ...toJS(howto),
+          comments,
+        }
+
+        const dbRef = this.db
+          .collection<IHowto>(COLLECTION_NAME)
+          .doc(updatedHowto._id)
+
+        await dbRef.set(updatedHowto)
+
+        // Refresh the active howto
+        this.activeHowto = await dbRef.get()
+      }
+    } catch (err) {
+      console.error(err)
+      throw new Error(err)
+    }
+  }
+
   // upload a new or update an existing how-to
   public async uploadHowTo(values: IHowtoFormInput | IHowtoDB) {
-    console.log('uploading howto')
+    logger.debug('uploading howto')
     this.updateUploadStatus('Start')
     // create a reference either to the existing document (if editing) or a new document if creating
     const dbRef = this.db
       .collection<IHowto>(COLLECTION_NAME)
       .doc((values as IHowtoDB)._id)
     const id = dbRef.id
+
+    // keep comments if doc existed previously
+    const existingDoc = await dbRef.get()
+    const comments =
+      existingDoc && existingDoc.comments ? existingDoc.comments : []
+
     const user = this.activeUser as IUser
     try {
       // upload any pending images, avoid trying to re-upload images previously saved
@@ -173,6 +300,7 @@ export class HowtoStore extends ModuleStore {
       const howTo: IHowto = {
         ...values,
         _createdBy: values._createdBy ? values._createdBy : user.userName,
+        comments,
         cover_image: processedCover,
         steps: processedSteps,
         files: processedFiles,
@@ -192,16 +320,16 @@ export class HowtoStore extends ModuleStore {
             ? values.creatorCountry
             : '',
       }
-      console.log('populating database', howTo)
+      logger.debug('populating database', howTo)
       // set the database document
       await dbRef.set(howTo)
       this.updateUploadStatus('Database')
-      console.log('post added')
+      logger.debug('post added')
       this.activeHowto = await dbRef.get()
       // complete
       this.updateUploadStatus('Complete')
     } catch (error) {
-      console.log('error', error)
+      logger.error('error', error)
       throw new Error(error.message)
     }
   }

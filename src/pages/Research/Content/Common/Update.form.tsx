@@ -3,7 +3,7 @@ import { observer } from 'mobx-react'
 import * as React from 'react'
 import { Field, Form } from 'react-final-form'
 import { Prompt, RouteComponentProps } from 'react-router'
-import { Box } from 'rebass'
+import { Box } from 'rebass/styled-components'
 import IconHeaderHowto from 'src/assets/images/header-section/howto-header-icon.svg'
 import { Button } from 'src/components/Button'
 import ElWithBeforeIcon from 'src/components/ElWithBeforeIcon'
@@ -62,7 +62,9 @@ const UpdateForm = observer((props: IProps) => {
   const trySubmitForm = () => {
     const form = document.getElementById('updateForm')
     if (typeof form !== 'undefined' && form !== null) {
-      form.dispatchEvent(new Event('submit', { cancelable: true }))
+      form.dispatchEvent(
+        new Event('submit', { cancelable: true, bubbles: true }),
+      )
     }
   }
 

@@ -1,9 +1,10 @@
-import React from 'react'
+import { Route } from 'react-router'
+import { MODULE } from 'src/modules'
 import {
   ResearchStore,
   ResearchStoreContext,
 } from 'src/stores/Research/research.store'
-import { AuthRoute } from '../common/AuthRoute'
+import type { IPageMeta } from '../PageList'
 import ResearchRoutes from './research.routes'
 
 /**
@@ -11,12 +12,13 @@ import ResearchRoutes from './research.routes'
  * @description The research module enables users to share ongoing updates for
  * experimental projects
  */
-export const ResearchModule = {
+export const ResearchModule: IPageMeta = {
+  moduleName: MODULE.RESEARCH,
   path: '/research',
   component: <ResearchModuleContainer />,
   title: 'Research',
   description: 'Welcome to research',
-  requiredRole: 'beta-tester',
+  // requiredRole: 'beta-tester',
 }
 
 /**
@@ -25,11 +27,8 @@ export const ResearchModule = {
 function ResearchModuleContainer() {
   return (
     <ResearchStoreContext.Provider value={new ResearchStore()}>
-      <AuthRoute
-        component={ResearchRoutes}
-        roleRequired="beta-tester"
-        redirectPath="/"
-      />
+      {/* <AuthRoute component={ResearchRoutes}      roleRequired={undefined}  /> */}
+      <Route component={ResearchRoutes} />
     </ResearchStoreContext.Provider>
   )
 }

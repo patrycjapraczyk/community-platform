@@ -1,5 +1,5 @@
 import * as React from 'react'
-import { Box, Image } from 'rebass'
+import { Box, Image } from 'rebass/styled-components'
 import styled from 'styled-components'
 import { Button } from '../Button'
 import 'react-image-lightbox/style.css'
@@ -20,8 +20,8 @@ const AlignCenterWrapper = styled.div`
   width: 100%;
   overflow: hidden;
 `
-
-const ImageInputWrapper = styled(AlignCenterWrapper)<ITitleProps>`
+// any export to fix: https://github.com/microsoft/TypeScript/issues/37597
+const ImageInputWrapper = styled(AlignCenterWrapper as any)<ITitleProps>`
   position: relative;
   height: 100%;
   width: 100%;
@@ -32,7 +32,7 @@ const ImageInputWrapper = styled(AlignCenterWrapper)<ITitleProps>`
   cursor: pointer;
 `
 
-const UploadImageOverlay = styled(AlignCenterWrapper)`
+const UploadImageOverlay = styled(AlignCenterWrapper as any)`
   position: absolute;
   top: 0;
   left: 0;
@@ -75,9 +75,6 @@ const defaultProps: IProps = {
 }
 
 export interface IConvertedFileMeta {
-  startSize: string
-  endSize: string
-  compressionPercent: number
   photoData: Blob
   objectUrl: string
   name: string

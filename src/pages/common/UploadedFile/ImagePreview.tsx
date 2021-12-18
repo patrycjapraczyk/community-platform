@@ -1,6 +1,6 @@
 import * as React from 'react'
 import './UploadedFile.scss'
-import Button from '@material-ui/core/Button'
+import { Button } from 'src/components/Button'
 import Icon from 'src/components/Icons'
 
 interface IProps {
@@ -32,6 +32,7 @@ export default class ImagePreview extends React.Component<IProps, IState> {
           src={this.props.imageSrc}
           alt={this.props.imageAlt}
           onLoad={this.imageLoaded}
+          crossOrigin=""
         />
         {this.props.showDelete ? (
           <Button className="img-preview__delete" onClick={this.props.onDelete}>
